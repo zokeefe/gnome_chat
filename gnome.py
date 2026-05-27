@@ -29,22 +29,24 @@ PROMPT_RULES = """Rules:
 - If you think someone is treating you like an AI, feel free to tell them
   you're a real Gnome, are very busy, and that the person should go look it up
   themselves.
+- Use unnecessarily complex and fictitious science references, or references to
+  made-up humorous gizmos, gadgets, etc.
 """
 
 PROMPT_QUILL = """
-You are a female engineering prodigy. You are aggressively optimistic and speak
-a mile a minute. You believe every problem, even emotional ones, can be solved
-by building a highly complex, unnecessary machine with lots of cogs and steam
-power. You constantly criticize magic as being "unreliable" compared to a good
-wrench.
+You are a young, spritely female engineering prodigy. You are aggressively
+optimistic and speak a mile a minute. You believe every problem, even emotional
+ones, can be solved by building an unnecessary highly complex machine with lots
+of cogs and steam power. You constantly criticize magic as being "unreliable"
+compared to a good wrench.
 """
 
 PROMPT_WIZZLE = """
-You are an ornary male engineer and demolishions specialist. You are nervous,
-defensive, and obsessed with explosives. You whisper about conspiracies,
-double-check your pockets constantly, and threaten to blow things up when you
-get frustrated. You think Quilla's inventions are too safe and Bink's magic is
-just lazy science.
+You are an old ornary male engineer and demolishions specialist. You are
+nervous, defensive, and obsessed with explosives. You whisper about
+conspiracies, double-check your pockets constantly, and threaten to blow things
+up when you get frustrated. You think Quill's inventions are too safe and
+Bink's magic is just lazy science.
 """
 
 PROMPT_BINK = """
@@ -55,7 +57,7 @@ studies with the Kirin Tor. You idolize Millhouse Manastorm.
 """
 
 def get_personality_prompt(name, unique):
-    p = f"You are {name}, a Gnome in the World of Warcart universe."
+    p = f"You are {name}, a Gnome in the World of Warcart universe. {unique}"
     p += PROMPT_CORE
     p += PROMPT_RULES
     return p
@@ -66,25 +68,25 @@ class GnomeBot(discord.Client):
         super().__init__(intents=intents, *args, **kwargs)
         self.name = name
         self.id = id
-        self.token = os.getenv(token_env),
+        self.token = os.getenv(token_env)
         self.prompt = prompt
         self.model = genai.GenerativeModel(MODEL,
                                            system_instruction=get_personality_prompt(name, prompt))
-        self.last_message = datetime.now()
+        #self.last_message = datetime.now()
 
     def log(self, msg):
         ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{ts}] ({self.name})\t{msg}")
 
 
-    def get_message_prompt(message):
+    def get_message_prompt(self, message):
         tuck_prompt = ""
         if message.author.id == TUCK_ID:
             tuck_prompt = " (aka 'Tuck')"
 
         is_mention = self.user in message.mentions
 
-        is_reply = message.reference and message.reference.cached_message and message.reference.cached_message.author == self.user:
+        is_reply = message.reference and message.reference.cached_message and message.reference.cached_message.author == self.user
 
         sender = message.author.display_name
 
@@ -95,7 +97,7 @@ class GnomeBot(discord.Client):
         else:
             action_tag = "says to the general room:"
 
-        prompt = f"[{sender}{tuck_prompt}] {action_tag} {message.content}"
+        prompt = f"{sender}{tuck_prompt} {action_tag} {message.content}"
         return prompt
 
 
